@@ -7,7 +7,7 @@ import pygame as pg
 
 WIDTH = 1000  # ゲームウィンドウの幅
 HEIGHT = 600  # ゲームウィンドウの高さ
-NUM_OF_BOMBS = 5
+NUM_OF_BOMBS = 2
 
 
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
@@ -102,7 +102,7 @@ class Bomb:
         self.img.set_colorkey((0, 0, 0))
         self.rct = self.img.get_rect()
         self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
-        self.vx, self.vy = +5, +5
+        self.vx, self.vy = 0, 0
 
     def update(self, screen: pg.Surface):
         """
@@ -124,11 +124,23 @@ class Beam:#ビーム打つ
         self.rct = self.img.get_rect()
         self.rct.centerx = bird.rct.centerx + bird.rct.width*2/3
         self.rct.centery = bird.rct.centery
-        self.vx, self.vy = +5, 0
-
+        self.vx, self.vy = 5, 0
+    
     def update(self, screen:pg.Surface):#ビーム横移動。右に
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
+
+class Explo:
+    def __init__(self, bomb, tmr):
+        self.img = pg.image.load("ex03/fig/explosion.gif")
+        self.rct = self.img.get_rect()
+        self.rct.center =  bomb[0], bomb[1]
+        self.tmr = tmr
+
+    def update(self, screen,  now):
+        if self.tmr-now >= -150:
+            screen.blit(self.img, self.rct)
+
 
 
 def main():
@@ -138,6 +150,7 @@ def main():
     bird = Bird(3, (900, 400))
     #bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
+    explos = []
     beam = None
 
     clock = pg.time.Clock()
@@ -162,10 +175,14 @@ def main():
         for i, bomb in enumerate(bombs):
             if beam != None:
                 if bomb.rct.colliderect(beam.rct):
-                    bombs[i] = None
+                    explos.append(Explo((bombs[i].rct[0], bombs[i].rct[1]), tmr))
+                    bombs[i]= None
                     beam = None
                     bird.change_img(6, screen)
                     pg.display.update()
+
+        for explo in explos:
+            explo.update(screen, tmr)
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)

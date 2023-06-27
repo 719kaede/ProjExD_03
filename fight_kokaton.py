@@ -130,21 +130,28 @@ class Beam:#ビーム打つ
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
 
-class Explo:
+class Explo:#爆発エフェクト
     def __init__(self, bomb, tmr):
         self.img = pg.image.load("ex03/fig/explosion.gif")
+        self.img1 = pg.transform.flip(self.img, True, True)
+        self.imgs = [self.img, self.img1]
         self.rct = self.img.get_rect()
         self.rct.center =  bomb[0], bomb[1]
         self.tmr = tmr
 
     def update(self, screen,  now):
-        if self.tmr-now >= -150:
-            screen.blit(self.img, self.rct)
+        if self.tmr-now >= -50:
+            if now%2 == 0:
+                screen.blit(self.imgs[0], self.rct)
+            else:
+                screen.blit(self.imgs[1], self.rct)
 
-def score(score, screen):
+
+def score(score, screen):#スコア計算
     fonto = pg.font.Font(None, 40)
-    txt = fonto.render("score:"+str(score), True, (255, 255, 255))
+    txt = fonto.render("score:"+str(score), True, (50, 50, 255))
     screen.blit(txt, [10, 10])
+
 
 def main():
     pg.display.set_caption("たたかえ！こうかとん")

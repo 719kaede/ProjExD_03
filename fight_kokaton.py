@@ -141,7 +141,10 @@ class Explo:
         if self.tmr-now >= -150:
             screen.blit(self.img, self.rct)
 
-
+def score(score, screen):
+    fonto = pg.font.Font(None, 40)
+    txt = fonto.render("score:"+str(score), True, (255, 255, 255))
+    screen.blit(txt, [10, 10])
 
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
@@ -163,6 +166,7 @@ def main():
                 beam = Beam(bird)
         
         screen.blit(bg_img, [0, 0])
+        score(len(explos), screen)
         
         for bomb in bombs:
             if bird.rct.colliderect(bomb.rct):

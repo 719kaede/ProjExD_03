@@ -7,6 +7,7 @@ import pygame as pg
 
 WIDTH = 1000  # ゲームウィンドウの幅
 HEIGHT = 600  # ゲームウィンドウの高さ
+NUM_OF_BOMBS = 5
 
 
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
@@ -95,6 +96,7 @@ class Bomb:
         引数1 color：爆弾円の色タプル
         引数2 rad：爆弾円の半径
         """
+        
         self.img = pg.Surface((2*rad, 2*rad))
         pg.draw.circle(self.img, color, (rad, rad), rad)
         self.img.set_colorkey((0, 0, 0))
@@ -134,7 +136,8 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("ex03/fig/pg_bg.jpg")
     bird = Bird(3, (900, 400))
-    bomb = Bomb((255, 0, 0), 10)
+    #bomb = Bomb((255, 0, 0), 10)
+    bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     beam = None
 
     clock = pg.time.Clock()
@@ -148,7 +151,7 @@ def main():
         
         screen.blit(bg_img, [0, 0])
         
-        if bomb != None:
+        for bomb in bombs:
             if bird.rct.colliderect(bomb.rct):
                 # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
                 bird.change_img(8, screen)
@@ -156,16 +159,18 @@ def main():
                 time.sleep(1)
                 return
         
-        if beam != None and bomb != None:
-            if bomb.rct.colliderect(beam.rct):
-                bomb = None
-                beam = None
-                bird.change_img(6, screen)
-                pg.display.update()
+        for i, bomb in enumerate(bombs):
+            if beam != None:
+                if bomb.rct.colliderect(beam.rct):
+                    bombs[i] = None
+                    beam = None
+                    bird.change_img(6, screen)
+                    pg.display.update()
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
-        if bomb != None:
+        bombs = [bomb for bomb in bombs if bomb is not None]
+        for bomb in bombs:
             bomb.update(screen)
         if beam != None:
             beam.update(screen)
